@@ -88,7 +88,7 @@ struct ContentView: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 8)
-        .liquidGlass(.regular, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .liquidGlass(cornerRadius: 26)
     }
 }
 

@@ -1,74 +1,39 @@
 import SwiftUI
+import UIKit
+import LiquidGlassKit
 
-enum GlassStyle {
-    case regular
-    case interactive
-    case tinted(Color)
+struct LiquidGlassBackground: UIViewRepresentable {
+    var cornerRadius: CGFloat
+    var interactive: Bool = true
+    var tint: UIColor? = nil
 
-    var material: Material {
-        switch self {
-        case .interactive:
-            return .thinMaterial
-        default:
-            return .ultraThinMaterial
-        }
+    func makeUIView(context: Context) -> UIView {
+        let effect = LiquidGlassEffect(style: .regular, isNative: true)
+        effect.isInteractive = interactive
+        effect.tintColor = tint
+
+        let view = VisualEffectView(effect: effect)
+        view.backgroundColor = .clear
+        view.layer.cornerRadius = cornerRadius
+        view.layer.cornerCurve = .continuous
+        view.clipsToBounds = true
+        return view as UIView
     }
 
-    var tint: Color? {
-        switch self {
-        case .tinted(let color):
-            return color
-        default:
-            return nil
-        }
-    }
-
-    @available(iOS 26.0, *)
-    var nativeGlass: Glass {
-        switch self {
-        case .regular:
-            return .regular
-        case .interactive:
-            return .regular.interactive()
-        case .tinted(let color):
-            return .regular.tint(color).interactive()
-        }
+    func updateUIView(_ uiView: UIView, context: Context) {
+        uiView.layer.cornerRadius = cornerRadius
+        uiView.layer.cornerCurve = .continuous
     }
 }
 
 extension View {
-    @ViewBuilder
-    func liquidGlass<S: Shape>(_ style: GlassStyle = .regular, in shape: S) -> some View {
-        if #available(iOS 26.0, *) {
-            self.glassEffect(style.nativeGlass, in: shape)
-        } else {
-            self.modifier(LegacyGlassModifier(shape: shape, style: style))
-        }
-    }
-}
-
-private struct LegacyGlassModifier<S: Shape>: ViewModifier {
-    let shape: S
-    let style: GlassStyle
-
-    func body(content: Content) -> some View {
-        content.background(
-            ZStack {
-                shape.fill(style.material)
-
-                if let tint = style.tint {
-                    shape.fill(tint.opacity(0.3)).blendMode(.overlay)
-                }
-
-                shape.stroke(
-                    LinearGradient(
-                        colors: [.white.opacity(0.55), .white.opacity(0.08)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-            }
+    func liquidGlass(cornerRadius: CGFloat, interactive: Bool = true, tint: Color? = nil) -> some View {
+        background(
+            LiquidGlassBackground(
+                cornerRadius: cornerRadius,
+                interactive: interactive,
+                tint: tint.map { UIColor($0) }
+            )
         )
     }
 }
