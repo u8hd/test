@@ -23,27 +23,26 @@ struct ContentView: View {
     ]
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             background.ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                ZStack {
-                    WebView(model: model, isLoading: $isLoading, initialPath: selectedPath)
+            WebView(model: model, isLoading: $isLoading, initialPath: selectedPath)
+                .ignoresSafeArea(edges: .bottom)
 
-                    if isLoading {
-                        ProgressView()
-                            .controlSize(.large)
-                            .tint(Color(red: 1.0, green: 0.33, blue: 0.0))
-                    }
-                }
-
-                navBar
+            if isLoading {
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(Color(red: 1.0, green: 0.33, blue: 0.0))
             }
+
+            navBar
+                .padding(.horizontal, 16)
+                .padding(.bottom, 6)
         }
     }
 
     private var navBar: some View {
-        HStack(alignment: .center, spacing: 0) {
+        HStack(spacing: 0) {
             ForEach(items) { item in
                 Button {
                     selectedPath = item.path
@@ -51,26 +50,19 @@ struct ContentView: View {
                 } label: {
                     VStack(spacing: 4) {
                         Image(systemName: item.systemImage)
-                            .font(.system(size: 22))
+                            .font(.system(size: 20))
                         Text(item.title)
                             .font(.system(size: 10, weight: .medium))
                     }
-                    .foregroundStyle(selectedPath == item.path ? Color.white : Color.white.opacity(0.55))
+                    .foregroundStyle(selectedPath == item.path ? Color.white : Color.white.opacity(0.6))
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.top, 10)
-        .padding(.bottom, 4)
-        .background(
-            background.overlay(
-                Rectangle()
-                    .frame(height: 0.5)
-                    .foregroundStyle(.white.opacity(0.12)),
-                alignment: .top
-            )
-        )
+        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .liquidGlass(.regular, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 }
 

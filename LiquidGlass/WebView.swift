@@ -5,8 +5,14 @@ final class WebViewModel: ObservableObject {
     weak var webView: WKWebView?
 
     func load(path: String) {
-        guard let webView, let url = URL(string: "https://soundcloud.com" + path) else { return }
-        webView.load(URLRequest(url: url))
+        guard let webView else { return }
+        let js = "window.__scNav ? window.__scNav('\(path)') : false"
+        webView.evaluateJavaScript(js) { result, _ in
+            let handled = (result as? Bool) ?? false
+            if !handled, let url = URL(string: "https://soundcloud.com" + path) {
+                webView.load(URLRequest(url: url))
+            }
+        }
     }
 }
 
@@ -22,12 +28,12 @@ struct WebView: UIViewRepresentable {
       var style = document.createElement('style');
       style.textContent = css;
       (document.head || document.documentElement).appendChild(style);
-      function removeNav() {
-        var nodes = document.querySelectorAll('.NavBar_NavBarList__3McZ5');
-        for (var i = 0; i < nodes.length; i++) { nodes[i].remove(); }
-      }
-      removeNav();
-      new MutationObserver(removeNav).observe(document.documentElement, { childList: true, subtree: true });
+      window.__scNav = function(path) {
+        var link = document.querySelector('.NavBar_NavBarList__3McZ5 a[href="' + path + '"]');
+        if (!link) { link = document.querySelector('a[href="' + path + '"]'); }
+        if (link) { link.click(); return true; }
+        return false;
+      };
     })();
     """
 
@@ -67,6 +73,7 @@ struct WebView: UIViewRepresentable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let parent: WebView
+        private var hasFinishedFirstLoad = false
 
         init(_ parent: WebView) {
             self.parent = parent
@@ -80,19 +87,24 @@ struct WebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            parent.isLoading = true
+            if !hasFinishedFirstLoad {
+                parent.isLoading = true
+            }
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             parent.isLoading = false
+            hasFinishedFirstLoad = true
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
             parent.isLoading = false
+            hasFinishedFirstLoad = true
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
             parent.isLoading = false
+            hasFinishedFirstLoad = true
         }
     }
 }
