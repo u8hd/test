@@ -28,10 +28,22 @@ struct WebView: UIViewRepresentable {
       var style = document.createElement('style');
       style.textContent = css;
       (document.head || document.documentElement).appendChild(style);
+      window.__scBlur = function() {
+        var tries = 0;
+        var t = setInterval(function() {
+          var a = document.activeElement;
+          if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) { a.blur(); }
+          if (++tries > 12) { clearInterval(t); }
+        }, 100);
+      };
       window.__scNav = function(path) {
         var link = document.querySelector('.NavBar_NavBarList__3McZ5 a[href="' + path + '"]');
         if (!link) { link = document.querySelector('a[href="' + path + '"]'); }
-        if (link) { link.click(); return true; }
+        if (link) {
+          link.click();
+          if (path === '/search') { window.__scBlur(); }
+          return true;
+        }
         return false;
       };
     })();

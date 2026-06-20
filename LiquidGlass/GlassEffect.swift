@@ -22,15 +22,32 @@ enum GlassStyle {
             return nil
         }
     }
-}
 
-extension View {
-    func liquidGlass<S: Shape>(_ style: GlassStyle = .regular, in shape: S) -> some View {
-        modifier(LiquidGlassModifier(shape: shape, style: style))
+    @available(iOS 26.0, *)
+    var nativeGlass: Glass {
+        switch self {
+        case .regular:
+            return .regular
+        case .interactive:
+            return .regular.interactive()
+        case .tinted(let color):
+            return .regular.tint(color).interactive()
+        }
     }
 }
 
-private struct LiquidGlassModifier<S: Shape>: ViewModifier {
+extension View {
+    @ViewBuilder
+    func liquidGlass<S: Shape>(_ style: GlassStyle = .regular, in shape: S) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(style.nativeGlass, in: shape)
+        } else {
+            self.modifier(LegacyGlassModifier(shape: shape, style: style))
+        }
+    }
+}
+
+private struct LegacyGlassModifier<S: Shape>: ViewModifier {
     let shape: S
     let style: GlassStyle
 
