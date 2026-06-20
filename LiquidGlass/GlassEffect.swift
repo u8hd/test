@@ -14,6 +14,8 @@ struct LiquidGlassBackground: UIViewRepresentable {
 
         let view = VisualEffectView(effect: effect)
         view.backgroundColor = .clear
+        view.isUserInteractionEnabled = false
+        view.contentView.isUserInteractionEnabled = false
         view.layer.cornerRadius = cornerRadius
         view.layer.cornerCurve = .continuous
         view.clipsToBounds = true
