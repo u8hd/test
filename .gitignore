@@ -6,6 +6,10 @@ xcuserdata/
 *.xcscmblueprint
 *.xccheckout
 
+# Build outputs baixados localmente
+*.ipa
+_ipa_check/
+
 # macOS
 .DS_Store
 
