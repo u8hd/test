@@ -82,6 +82,7 @@ struct ContentView: View {
                                 .matchedGeometryEffect(id: "tabHighlight", in: glassNamespace)
                         }
                     }
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(PressableStyle())
             }

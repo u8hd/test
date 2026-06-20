@@ -5,14 +5,8 @@ final class WebViewModel: ObservableObject {
     weak var webView: WKWebView?
 
     func load(path: String) {
-        guard let webView else { return }
-        let js = "window.__scNav ? window.__scNav('\(path)') : false"
-        webView.evaluateJavaScript(js) { result, _ in
-            let handled = (result as? Bool) ?? false
-            if !handled, let url = URL(string: "https://soundcloud.com" + path) {
-                webView.load(URLRequest(url: url))
-            }
-        }
+        guard let webView, let url = URL(string: "https://soundcloud.com" + path) else { return }
+        webView.load(URLRequest(url: url))
     }
 }
 
@@ -33,19 +27,10 @@ struct WebView: UIViewRepresentable {
         var t = setInterval(function() {
           var a = document.activeElement;
           if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) { a.blur(); }
-          if (++tries > 12) { clearInterval(t); }
+          if (++tries > 14) { clearInterval(t); }
         }, 100);
       };
-      window.__scNav = function(path) {
-        var link = document.querySelector('.NavBar_NavBarList__3McZ5 a[href="' + path + '"]');
-        if (!link) { link = document.querySelector('a[href="' + path + '"]'); }
-        if (link) {
-          link.click();
-          if (path === '/search') { window.__scBlur(); }
-          return true;
-        }
-        return false;
-      };
+      if (location.pathname.indexOf('/search') === 0) { window.__scBlur(); }
     })();
     """
 
