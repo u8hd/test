@@ -1,0 +1,8 @@
+# Normaliza finais de linha: tudo LF no repositório
+* text=auto eol=lf
+
+# Arquivos que devem permanecer binários
+*.png binary
+*.jpg binary
+*.ipa binary
+*.xcarchive binary
