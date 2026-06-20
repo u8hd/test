@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: macos-15
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,3 +55,15 @@ jobs:
           name: LiquidGlass-unsigned-ipa
           path: ${{ runner.temp }}/LiquidGlass-unsigned.ipa
           if-no-files-found: error
+
+      - name: Publish .ipa to Release (link público)
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Última build (unsigned)
+          body: |
+            IPA não assinado gerado automaticamente a partir do commit ${{ github.sha }}.
+            Link direto: baixe o arquivo LiquidGlass-unsigned.ipa abaixo.
+          files: ${{ runner.temp }}/LiquidGlass-unsigned.ipa
+          fail_on_unmatched_files: true
