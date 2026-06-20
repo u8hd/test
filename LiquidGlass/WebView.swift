@@ -8,6 +8,15 @@ final class WebViewModel: ObservableObject {
         guard let webView, let url = URL(string: "https://soundcloud.com" + path) else { return }
         webView.load(URLRequest(url: url))
     }
+
+    func search(query: String) {
+        guard let webView else { return }
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        guard let url = URL(string: "https://soundcloud.com/search?q=\(encoded)") else { return }
+        webView.load(URLRequest(url: url))
+    }
 }
 
 struct WebView: UIViewRepresentable {
@@ -18,7 +27,7 @@ struct WebView: UIViewRepresentable {
     static let injectedJS = """
     (function() {
       if (location.hostname.indexOf('soundcloud.com') === -1) { return; }
-      var css = 'html, body { background-color: #121212 !important; } .NavBar_NavBarList__3McZ5 { display: none !important; }';
+      var css = 'html, body { background-color: #121212 !important; } .NavBar_NavBarList__3McZ5 { display: none !important; } .SearchBar_SearchBarContainer__1eIv_ { display: none !important; }';
       var style = document.createElement('style');
       style.textContent = css;
       (document.head || document.documentElement).appendChild(style);

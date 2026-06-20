@@ -19,6 +19,8 @@ struct ContentView: View {
     @StateObject private var model = WebViewModel()
     @State private var isLoading = true
     @State private var selectedPath = "/discover"
+    @State private var searchText = ""
+    @FocusState private var searchFocused: Bool
     @Namespace private var glassNamespace
 
     private let background = Color(red: 18 / 255, green: 18 / 255, blue: 18 / 255)
@@ -49,7 +51,51 @@ struct ContentView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 6)
         }
+        .overlay(alignment: .top) {
+            if selectedPath == "/search" {
+                searchBar
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
         .animation(.easeInOut(duration: 0.25), value: isLoading)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedPath)
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.7))
+
+            TextField("", text: $searchText, prompt: Text("Search").foregroundColor(.white.opacity(0.5)))
+                .font(.system(size: 16))
+                .foregroundStyle(.white)
+                .tint(Color(red: 1.0, green: 0.33, blue: 0.0))
+                .focused($searchFocused)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .onSubmit {
+                    model.search(query: searchText)
+                    searchFocused = false
+                }
+
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .liquidGlass(cornerRadius: 24)
     }
 
     private var navBar: some View {
